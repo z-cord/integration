@@ -1,0 +1,24 @@
+{
+    "name": "discord-integration",
+    "version": 2,
+    "alias": "zcord.tech",
+    "builds": [
+      { "src": "src/**/*.ts", "use": "@now/node" }
+    ],
+    "routes": [
+      { "src": "/authorize", "dest": "/src/api/discord/authorize.ts" },
+      { "src": "/callback", "dest": "/src/api/discord/callback.ts" },
+      { "src": "/uihook", "dest": "/src/uihook/uihook.ts" },
+      { "src": "/webhook", "dest": "/src/api/webhook-handler.ts" },
+      { "src": "/zeit", "dest": "/src/api/zeit/callback.ts" }
+    ],
+    "env": {
+      "HOOK_URL": "https://zcord.tech",
+      "NODE_ENV": "production",
+      "ZEIT_CLIENT_REDIRECT_URI": "https://zcord.tech/zeit",
+      "ZEIT_CLIENT_ID": "@zeit-client-id",
+      "ZEIT_CLIENT_SECRET": "@zeit-client-secret",
+      "DISCORD_CLIENT_ID": "@discord-client-id",
+      "DISCORD_CLIENT_SECRET": "@discord-client-secret"
+    }
+}
