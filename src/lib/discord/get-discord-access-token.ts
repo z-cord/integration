@@ -8,7 +8,7 @@ import { DiscordToken } from '../../types';
  * assumed that the token has the scope of incoming webhook as that's the
  * only feature we include for now.
  */
-export default async function getAccessToken(code: string) {
+export default async function getDiscordAccessToken(code: string) {
 	const response = await fetch('https://discordapp.com/api/v6/oauth2/token', {
 		method: 'POST',
 		headers: {
