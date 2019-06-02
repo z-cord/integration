@@ -12,8 +12,7 @@ export default async function sendDiscordMessage({
 	event: string
 }){
 	const url = `https://discordapp.com/api/v6/webhooks/${dwt.webhook.id}/${dwt.webhook.token}` 
-
-	const res = await fetch(url, {
+	await fetch(url, {
 		method: 'POST',
 		body: JSON.stringify({
 			"content": event
@@ -22,12 +21,4 @@ export default async function sendDiscordMessage({
 			"Content-Type": "application/json",
 		}
 	});
-
-	if (res.status !== 200) {
-		throw new Error(
-			`Error executing Discord webhook: ${
-				res
-			} error: ${await res.text()}`
-		);
-	}
 }
