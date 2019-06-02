@@ -1,5 +1,5 @@
 import { parse } from 'url';
-import { send } from 'micro';
+import { send, json } from 'micro';
 import { IncomingMessage, ServerResponse } from 'http';
 import getAccessToken from '../../lib/zeit/get-zeit-access-token';
 import getAuthorizeUrl from '../../lib/get-authorize-url';
@@ -8,6 +8,12 @@ import getAuthorizeUrl from '../../lib/get-authorize-url';
 interface CallbackQuery {
 	code?: string;
 	next?: string;
+}
+
+interface DeletePayload {
+	configurationId?: string;
+	userId?: string;
+	teamId?: string;
 }
 
 /**
@@ -33,6 +39,11 @@ export default async function zeitCallback(
 	if (req.method === 'OPTIONS') {
 		return send(res, 200);
 	}
+
+	// if (req.method === 'DELETE') {
+	// 	const data: DeletePayload = await json(req);
+	// 	const configurationId = data.configurationId;
+	// }
 
 	/**
 	 * When there is a GET in this endpoint it means there is an authorization
