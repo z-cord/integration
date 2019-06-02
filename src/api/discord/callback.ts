@@ -3,11 +3,11 @@ import { parse } from 'url';
 import { send } from 'micro';
 import { AUTH_COOKIE_NAME } from '../../constants';
 import { DiscordToken } from '../../types';
-// import createZeitWebhook from '../../lib/zeit/create-webhook'
+import createZeitWebhook from '../../lib/zeit/create-zeit-webhook';
 import getDiscordAccessToken from '../../lib/discord/get-discord-access-token';
 import sendDiscordMessage from '../../lib/discord/send-discord-message'
 import cookie from 'cookie';
-
+import db from '../../lib/postgres/queries';
 
 interface CallbackQuery {
 	code?: string;
@@ -49,9 +49,36 @@ export default async function callback(req: IncomingMessage, res: ServerResponse
 	console.log("DISCORD_CODE", code)
 	const discordWebHook:DiscordToken = await getDiscordAccessToken(code);
 	console.log("DISCORD_TOKEN", discordWebHook)
+	const zeitWebhook = await createZeitWebhook(context.token)
+	console.log("ZEIT_WEBHOOK", zeitWebhook)
+
+	// const newEntry = {
+	// 	owner_id: context.ownerId,
+    //     zeit_token: context.token,
+    //     webhook_token: discordWebHook.webhook.token,
+    //     webhook_id: discordWebHook.webhook.id,
+    //     guild_id: discordWebHook.webhook.guild_id,
+	// 	channel_id: discordWebHook.webhook.channel_id
+	// }
+
+	await db.connect()
+	const createWebHook = await db.query(`
+		INSERT INTO 
+		webhooks(owner_id, zeit_token, webhook_token, webhook_id, guild_id, channel_id)
+		VALUES($1, $2, $3, $4, $5, $6)
+	`, [ 
+		context.ownerId,
+		context.token,
+		discordWebHook.webhook.token,
+		discordWebHook.webhook.id,
+		discordWebHook.webhook.guild_id,
+		discordWebHook.webhook.channel_id
+	]);
+	await db.end();
+
+	console.log("INSERT RESPONSE", createWebHook)
+
 	
-	// const zeitWebhook = await createZeitWebhook(context.token)
-	// console.log("ZEIT_WEBHOOK", zeitWebhook)
 
 	await sendDiscordMessage({dwt: discordWebHook, event: "Test message."})
 

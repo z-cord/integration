@@ -19,6 +19,11 @@
       "ZEIT_CLIENT_ID": "@zeit-client-id",
       "ZEIT_CLIENT_SECRET": "@zeit-client-secret",
       "DISCORD_CLIENT_ID": "@discord-client-id",
-      "DISCORD_CLIENT_SECRET": "@discord-client-secret"
+      "DISCORD_CLIENT_SECRET": "@discord-client-secret",
+      "DB_URI": "@db_uri",
+      "DB_USER": "@db-user",
+      "DB_HOST": "@db-host",
+      "DB_NAME": "@db-name",
+      "DB_PASS": "@db-pass"
     }
 }
