@@ -7,7 +7,6 @@ import createZeitWebhook from '../../lib/zeit/create-zeit-webhook';
 import getDiscordAccessToken from '../../lib/discord/get-discord-access-token';
 import sendDiscordMessage from '../../lib/discord/send-discord-message'
 import cookie from 'cookie';
-import db from '../../lib/postgres/queries';
 
 interface CallbackQuery {
 	code?: string;
@@ -60,23 +59,6 @@ export default async function callback(req: IncomingMessage, res: ServerResponse
     //     guild_id: discordWebHook.webhook.guild_id,
 	// 	channel_id: discordWebHook.webhook.channel_id
 	// }
-
-	await db.connect()
-	const createWebHook = await db.query(`
-		INSERT INTO 
-		webhooks(owner_id, zeit_token, webhook_token, webhook_id, guild_id, channel_id)
-		VALUES($1, $2, $3, $4, $5, $6)
-	`, [ 
-		context.ownerId,
-		context.token,
-		discordWebHook.webhook.token,
-		discordWebHook.webhook.id,
-		discordWebHook.webhook.guild_id,
-		discordWebHook.webhook.channel_id
-	]);
-	await db.end();
-
-	console.log("INSERT RESPONSE", createWebHook)
 
 	
 
