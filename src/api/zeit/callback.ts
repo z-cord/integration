@@ -1,5 +1,5 @@
 import { parse } from 'url';
-import { send, json } from 'micro';
+import { send } from 'micro';
 import { IncomingMessage, ServerResponse } from 'http';
 import getAccessToken from '../../lib/zeit/get-zeit-access-token';
 import getAuthorizeUrl from '../../lib/get-authorize-url';
@@ -10,11 +10,11 @@ interface CallbackQuery {
 	next?: string;
 }
 
-interface DeletePayload {
-	configurationId?: string;
-	userId?: string;
-	teamId?: string;
-}
+// interface DeletePayload {
+// 	configurationId?: string;
+// 	userId?: string;
+// 	teamId?: string;
+// }
 
 /**
  * Handles the callback to exchange a ZEIT authorization code for a token.

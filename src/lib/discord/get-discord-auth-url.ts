@@ -12,9 +12,8 @@ export default function getDiscordAuthorizeUrl(state: string) {
 	return `https://discordapp.com/oauth2/authorize?${stringify({
 		client_id: DISCORD_CLIENT_ID,
 		state,
-		permissions: 536881216,
 		redirect_uri: `${process.env.HOOK_URL}/callback`,
-		scope:"identify bot webhook.incoming",
+		scope:"webhook.incoming",
 		response_type: "code"
 	})}`;
 }
