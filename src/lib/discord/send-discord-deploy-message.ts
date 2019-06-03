@@ -30,12 +30,12 @@ export default async function sendDiscordDeployMessage({
 					url: `https://${event.payload!.url}`,
 					description: 
 `
-Event: 		${event.type.toUpperCase()}
-Name: 		${event.payload.name.toUpperCase()}
-Project: 	${event.payload.project.toUpperCase()}
-Plan: 		${event.payload.plan.toUpperCase()}
-Type: 		${event.payload.type.toUpperCase()}
-Region: 	${event.region.toUpperCase()}
+EVENT: 		${event.type}
+NAME: 		${event.payload.name}
+PROJECT: 	${event.payload.project}
+PLAN: 		${event.payload.plan}
+TYPE: 		${event.payload.type}
+REGION: 	${event.region}
 URL: 		https://${event.payload.url}
 `
 				}
