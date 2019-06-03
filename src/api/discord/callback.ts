@@ -58,6 +58,7 @@ export default async function callback(req: IncomingMessage, res: ServerResponse
 		webhooks: [
 			...config.webhooks,
 			{
+				configurationId: context.configurationId,
 				zeitWebhook,
 				discordWebhook: discordWebhook.webhook
 			}

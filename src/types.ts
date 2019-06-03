@@ -32,6 +32,7 @@ export interface IntegrationConfig {
 	teamId?: string;
 	zeitToken: string;
 	webhooks: {
+		configurationId: string,
 		discordWebhook: DiscordWebHook,
 		zeitWebhook: ZeitWebHook
 	}[];
