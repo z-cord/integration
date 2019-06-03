@@ -3,6 +3,8 @@ import { send } from 'micro';
 import { IncomingMessage, ServerResponse } from 'http';
 import getAccessToken from '../../lib/zeit/get-zeit-access-token';
 import getAuthorizeUrl from '../../lib/get-authorize-url';
+import maybeGetIntegrationConfig from '../../lib/mongodb/maybe-get-integration-config';
+import saveIntegrationConfig from '../../lib/mongodb/save-integration-config';
 
 
 interface CallbackQuery {
@@ -66,6 +68,15 @@ export default async function zeitCallback(
 
 		const ownerId = tokenInfo.team_id || tokenInfo.user_id;
 		const configurationId = tokenInfo.installation_id;
+		const maybeConfig = await maybeGetIntegrationConfig(ownerId);
+
+		await saveIntegrationConfig({
+			zeitToken: tokenInfo.access_token,
+			// teamId: tokenInfo.team_id,
+			userId: tokenInfo.user_id,
+			webhooks: maybeConfig ? maybeConfig.webhooks : [],
+			ownerId
+		});
 
 		res.writeHead(302, {
 			Location: getAuthorizeUrl({ next, ownerId, configurationId, token: tokenInfo.access_token })

@@ -7,6 +7,9 @@ import createZeitWebhook from '../../lib/zeit/create-zeit-webhook';
 import getDiscordAccessToken from '../../lib/discord/get-discord-access-token';
 import sendDiscordMessage from '../../lib/discord/send-discord-message'
 import cookie from 'cookie';
+import getIntegrationConfig from '../../lib/mongodb/get-integration-config';
+import saveIntegrationConfig from '../../lib/mongodb/save-integration-config';
+
 
 interface CallbackQuery {
 	code?: string;
@@ -45,24 +48,23 @@ export default async function callback(req: IncomingMessage, res: ServerResponse
 			'No configurationId found to create ZEIT webhook'
 		);
 	}
-	console.log("DISCORD_CODE", code)
-	const discordWebHook:DiscordToken = await getDiscordAccessToken(code);
-	console.log("DISCORD_TOKEN", discordWebHook)
+
+	const config = await getIntegrationConfig(context.ownerId);
+	const discordWebhook:DiscordToken = await getDiscordAccessToken(code);
 	const zeitWebhook = await createZeitWebhook(context.token)
-	console.log("ZEIT_WEBHOOK", zeitWebhook)
 
-	// const newEntry = {
-	// 	owner_id: context.ownerId,
-    //     zeit_token: context.token,
-    //     webhook_token: discordWebHook.webhook.token,
-    //     webhook_id: discordWebHook.webhook.id,
-    //     guild_id: discordWebHook.webhook.guild_id,
-	// 	channel_id: discordWebHook.webhook.channel_id
-	// }
+	await saveIntegrationConfig({
+		...config,
+		webhooks: [
+			...config.webhooks,
+			{
+				zeitWebhook,
+				discordWebhook: discordWebhook.webhook
+			}
+		]
+	});
 
-	
-
-	await sendDiscordMessage({dwt: discordWebHook, event: "Test message."})
+	await sendDiscordMessage({dwt: discordWebhook, event: "We are now ready to notify you!"})
 
     res.writeHead(302, {
 		Location: `${decodeURIComponent(context.next)}`,
