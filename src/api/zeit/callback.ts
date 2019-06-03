@@ -1,8 +1,13 @@
 import { parse } from 'url';
-import { send } from 'micro';
+import { send, json } from 'micro';
 import { IncomingMessage, ServerResponse } from 'http';
 import getAccessToken from '../../lib/zeit/get-zeit-access-token';
 import getAuthorizeUrl from '../../lib/get-authorize-url';
+import maybeGetIntegrationConfig from '../../lib/mongodb/maybe-get-integration-config';
+import saveIntegrationConfig from '../../lib/mongodb/save-integration-config';
+import getIntegrationConfig from '../../lib/mongodb/get-integration-config';
+import removeIntegrationConfig from '../../lib/mongodb/remove-integration-config';
+import deleteZeitWebhook from '../../lib/zeit/delete-zeit-webhook'
 
 
 interface CallbackQuery {
@@ -10,11 +15,11 @@ interface CallbackQuery {
 	next?: string;
 }
 
-// interface DeletePayload {
-// 	configurationId?: string;
-// 	userId?: string;
-// 	teamId?: string;
-// }
+interface DeletePayload {
+	configurationId?: string;
+	userId?: string;
+	teamId?: string;
+}
 
 /**
  * Handles the callback to exchange a ZEIT authorization code for a token.
@@ -40,10 +45,31 @@ export default async function zeitCallback(
 		return send(res, 200);
 	}
 
-	// if (req.method === 'DELETE') {
-	// 	const data: DeletePayload = await json(req);
-	// 	const configurationId = data.configurationId;
-	// }
+	if (req.method === 'DELETE') {
+		const data: DeletePayload = await json(req);
+		const configurationId = data.configurationId;
+		const config = await getIntegrationConfig(data.teamId || data.userId!);
+		const deletedIdx = config.webhooks.findIndex(
+			webhook => webhook.configurationId === configurationId
+		);
+
+		if (deletedIdx !== -1) {
+			const webhook = config.webhooks[deletedIdx];
+			await deleteZeitWebhook(config.zeitToken, webhook.zeitWebhook.id);
+
+			if (config.webhooks.length <= 1) {
+				await removeIntegrationConfig(config);
+			} else {
+				config.webhooks = [
+					...config.webhooks.slice(0, deletedIdx),
+					...config.webhooks.slice(deletedIdx + 1)
+				];
+				await saveIntegrationConfig(config);
+			}
+		}
+
+		return send(res, 204);
+	}
 
 	/**
 	 * When there is a GET in this endpoint it means there is an authorization
@@ -54,7 +80,6 @@ export default async function zeitCallback(
 		const { query }: { query: CallbackQuery } = parse(req.url!, true);
         const { code, next } = query;
 		const tokenInfo = await getAccessToken(code!);
-		console.log("TOKEN_INFO", tokenInfo);
 
 		if (!tokenInfo) {
 			return send(res, 403, 'Error exchanging OAuth code');
@@ -66,6 +91,15 @@ export default async function zeitCallback(
 
 		const ownerId = tokenInfo.team_id || tokenInfo.user_id;
 		const configurationId = tokenInfo.installation_id;
+		const maybeConfig = await maybeGetIntegrationConfig(ownerId);
+
+		await saveIntegrationConfig({
+			zeitToken: tokenInfo.access_token,
+			// teamId: tokenInfo.team_id,
+			userId: tokenInfo.user_id,
+			webhooks: maybeConfig ? maybeConfig.webhooks : [],
+			ownerId
+		});
 
 		res.writeHead(302, {
 			Location: getAuthorizeUrl({ next, ownerId, configurationId, token: tokenInfo.access_token })

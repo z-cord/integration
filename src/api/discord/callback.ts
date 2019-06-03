@@ -5,9 +5,11 @@ import { AUTH_COOKIE_NAME } from '../../constants';
 import { DiscordToken } from '../../types';
 import createZeitWebhook from '../../lib/zeit/create-zeit-webhook';
 import getDiscordAccessToken from '../../lib/discord/get-discord-access-token';
-import sendDiscordMessage from '../../lib/discord/send-discord-message'
+import sendDiscordJoinMessage from '../../lib/discord/send-discord-join-message'
 import cookie from 'cookie';
-import db from '../../lib/postgres/queries';
+import getIntegrationConfig from '../../lib/mongodb/get-integration-config';
+import saveIntegrationConfig from '../../lib/mongodb/save-integration-config';
+
 
 interface CallbackQuery {
 	code?: string;
@@ -46,41 +48,25 @@ export default async function callback(req: IncomingMessage, res: ServerResponse
 			'No configurationId found to create ZEIT webhook'
 		);
 	}
-	console.log("DISCORD_CODE", code)
-	const discordWebHook:DiscordToken = await getDiscordAccessToken(code);
-	console.log("DISCORD_TOKEN", discordWebHook)
+
+	const config = await getIntegrationConfig(context.ownerId);
+	const discordWebhook:DiscordToken = await getDiscordAccessToken(code);
+	// console.log("ACCESS_TOKEN", discordWebhook.access_token)
 	const zeitWebhook = await createZeitWebhook(context.token)
-	console.log("ZEIT_WEBHOOK", zeitWebhook)
 
-	// const newEntry = {
-	// 	owner_id: context.ownerId,
-    //     zeit_token: context.token,
-    //     webhook_token: discordWebHook.webhook.token,
-    //     webhook_id: discordWebHook.webhook.id,
-    //     guild_id: discordWebHook.webhook.guild_id,
-	// 	channel_id: discordWebHook.webhook.channel_id
-	// }
+	await saveIntegrationConfig({
+		...config,
+		webhooks: [
+			...config.webhooks,
+			{
+				configurationId: context.configurationId,
+				zeitWebhook,
+				discordWebhook: discordWebhook.webhook
+			}
+		]
+	});
 
-	await db.connect()
-	const createWebHook = await db.query(`
-		INSERT INTO 
-		webhooks(owner_id, zeit_token, webhook_token, webhook_id, guild_id, channel_id)
-		VALUES($1, $2, $3, $4, $5, $6)
-	`, [ 
-		context.ownerId,
-		context.token,
-		discordWebHook.webhook.token,
-		discordWebHook.webhook.id,
-		discordWebHook.webhook.guild_id,
-		discordWebHook.webhook.channel_id
-	]);
-	await db.end();
-
-	console.log("INSERT RESPONSE", createWebHook)
-
-	
-
-	await sendDiscordMessage({dwt: discordWebHook, event: "Test message."})
+	await sendDiscordJoinMessage(discordWebhook.webhook)
 
     res.writeHead(302, {
 		Location: `${decodeURIComponent(context.next)}`,
