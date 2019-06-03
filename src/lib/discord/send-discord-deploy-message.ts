@@ -1,25 +1,28 @@
 import fetch from 'node-fetch';
-import { DiscordWebHook, Event } from '../../types';
+import { Event, IntegrationConfig } from '../../types';
+import getUserInfo from '../zeit/get-user-info';
+import { User } from '../zeit/types';
 
 /**
 
  */
 export default async function sendDiscordDeployMessage({
-	webhook, 
+	config, 
 	event
 }:{
-	webhook: DiscordWebHook,
+	config: IntegrationConfig,
 	event: Event
 }){
-	const url = `https://discordapp.com/api/v6/webhooks/${webhook.id}/${webhook.token}` 
 
-	console.log("IN SEND DISCORD DEPLOY MESSAGE")
-	console.log("URL")
-	console.log(url)
+	const userInfo:User = await getUserInfo(config.zeitToken)
+	// for now its default to first webhook till we sort by configuration id
+	const webhook = config.webhooks[0].discordWebhook;
+
+	const url = `https://discordapp.com/api/v6/webhooks/${webhook.id}/${webhook.token}` 
 	await fetch(url, {
 		method: 'POST',
 		body: JSON.stringify({
-			"content": `User reynaldo has triggered a deploy for ${event.payload!.project}`,
+			"content": `User ${userInfo.user.username} has triggered a deploy for ${event.payload!.project}`,
 			"embeds": [
 				{
 					type: "rich",
@@ -27,13 +30,13 @@ export default async function sendDiscordDeployMessage({
 					url: `https://${event.payload!.url}`,
 					description: 
 `
-Event: 		${event.type!.toUpperCase()}
-Name: 		${event.payload!.name.toUpperCase()}
-Project: 	${event.payload!.project.toUpperCase()}
-Plan: 		${event.payload!.plan.toUpperCase()}
-Type: 		${event.payload!.type.toUpperCase()}
-Region: 	${event.region!.toUpperCase()}
-URL: 		https://${event.payload!.url}
+Event: 		${event.type.toUpperCase()}
+Name: 		${event.payload.name.toUpperCase()}
+Project: 	${event.payload.project.toUpperCase()}
+Plan: 		${event.payload.plan.toUpperCase()}
+Type: 		${event.payload.type.toUpperCase()}
+Region: 	${event.region.toUpperCase()}
+URL: 		https://${event.payload.url}
 `
 				}
 			]

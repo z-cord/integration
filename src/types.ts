@@ -39,11 +39,11 @@ export interface IntegrationConfig {
 }
 
 export interface Event {
-	userId?: string;
-	teamId?: string;
-	type?: string;
-	region?: string;
-	payload?: {
+	userId: string;
+	teamId: string;
+	type: string;
+	region: string;
+	payload: {
 		name: string;
 		project: string;
 		url: string;
