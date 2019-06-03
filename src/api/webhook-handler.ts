@@ -2,7 +2,7 @@ import { IncomingMessage, ServerResponse } from 'http';
 import { send, json } from 'micro';
 import getIntegrationConfig from '../lib/mongodb/get-integration-config';
 import { IntegrationConfig, Event } from '../types';
-import sendDiscordMessage from '../lib/discord/send-discord-message';
+import sendDiscordDeployMessage from '../lib/discord/send-discord-deploy-message';
 
 export default async function webhookHandler(
 	req: IncomingMessage,
@@ -15,7 +15,8 @@ export default async function webhookHandler(
 	const config:IntegrationConfig = await getIntegrationConfig(ownerId!);
 
 	if (event.type == "deployment") {
-		sendDiscordMessage({webhook: config.webhooks[0].discordWebhook, event})
+		console.log("HERE")
+		sendDiscordDeployMessage({webhook: config.webhooks[0].discordWebhook, event})
 	}
     return send(res, 200);
 }

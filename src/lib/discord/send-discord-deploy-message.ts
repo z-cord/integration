@@ -4,7 +4,7 @@ import { DiscordWebHook, Event } from '../../types';
 /**
 
  */
-export default async function sendDiscordMessage({
+export default async function sendDiscordDeployMessage({
 	webhook, 
 	event
 }:{
@@ -13,6 +13,9 @@ export default async function sendDiscordMessage({
 }){
 	const url = `https://discordapp.com/api/v6/webhooks/${webhook.id}/${webhook.token}` 
 
+	console.log("IN SEND DISCORD DEPLOY MESSAGE")
+	console.log("URL")
+	console.log(url)
 	await fetch(url, {
 		method: 'POST',
 		body: JSON.stringify({
@@ -23,13 +26,15 @@ export default async function sendDiscordMessage({
 					title: `Deployment link for: ${event.payload!.name.toUpperCase()}`,
 					url: `https://${event.payload!.url}`,
 					description: 
-`Event: ${event.type!.toUpperCase()}
-Name: ${event.payload!.name.toUpperCase()}
-Project: ${event.payload!.project.toUpperCase()}
-Plan: ${event.payload!.plan.toUpperCase()}
-Type: ${event.payload!.type.toUpperCase()}
-Region: ${event.region!.toUpperCase()}
-URL: https://${event.payload!.url}`
+`
+Event: 		${event.type!.toUpperCase()}
+Name: 		${event.payload!.name.toUpperCase()}
+Project: 	${event.payload!.project.toUpperCase()}
+Plan: 		${event.payload!.plan.toUpperCase()}
+Type: 		${event.payload!.type.toUpperCase()}
+Region: 	${event.region!.toUpperCase()}
+URL: 		https://${event.payload!.url}
+`
 				}
 			]
 		}),
