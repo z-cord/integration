@@ -5,7 +5,7 @@ import { AUTH_COOKIE_NAME } from '../../constants';
 import { DiscordToken } from '../../types';
 import createZeitWebhook from '../../lib/zeit/create-zeit-webhook';
 import getDiscordAccessToken from '../../lib/discord/get-discord-access-token';
-import sendDiscordMessage from '../../lib/discord/send-discord-message'
+// import sendDiscordMessage from '../../lib/discord/send-discord-message'
 import cookie from 'cookie';
 import getIntegrationConfig from '../../lib/mongodb/get-integration-config';
 import saveIntegrationConfig from '../../lib/mongodb/save-integration-config';
@@ -64,7 +64,7 @@ export default async function callback(req: IncomingMessage, res: ServerResponse
 		]
 	});
 
-	await sendDiscordMessage({dwt: discordWebhook, event: "We are now ready to notify you!"})
+	// await sendDiscordMessage({webhook: discordWebhook.webhook, event: "We are now ready to notify you!"})
 
     res.writeHead(302, {
 		Location: `${decodeURIComponent(context.next)}`,

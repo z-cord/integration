@@ -3,8 +3,7 @@
     "version": 2,
     "alias": "zcord.tech",
     "builds": [
-      { "src": "src/api/**/*.ts", "use": "@now/node" },
-      { "src": "src/uihook/*.ts", "use": "@now/node" }
+      { "src": "src/uihook/uihook.ts", "use": "@now/node" }
     ],
     "routes": [
       { "src": "/authorize", "dest": "/src/api/discord/authorize.ts" },

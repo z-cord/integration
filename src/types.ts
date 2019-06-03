@@ -36,3 +36,18 @@ export interface IntegrationConfig {
 		zeitWebhook: ZeitWebHook
 	}[];
 }
+
+export interface Event {
+	userId?: string;
+	teamId?: string;
+	type?: string;
+	region?: string;
+	payload?: {
+		name: string;
+		project: string;
+		url: string;
+		deploymentId: string;
+		plan: string;
+		type: string;
+	};
+}
