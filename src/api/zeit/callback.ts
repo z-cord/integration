@@ -56,7 +56,6 @@ export default async function zeitCallback(
 		const { query }: { query: CallbackQuery } = parse(req.url!, true);
         const { code, next } = query;
 		const tokenInfo = await getAccessToken(code!);
-		console.log("TOKEN_INFO", tokenInfo);
 
 		if (!tokenInfo) {
 			return send(res, 403, 'Error exchanging OAuth code');
